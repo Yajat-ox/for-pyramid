@@ -1,0 +1,161 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>For You 💖</title>
+  <meta name="description" content="A tiny romantic site with popping text slides and floating hearts." />
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;700;900&display=swap" rel="stylesheet">
+  <style>
+    :root{
+      --bg:#ffeef6;
+      --card:#ffffff;
+      --ink:#222;
+      --muted:#6b6b6b;
+      --accentA:#ff6aa7;
+      --accentB:#9b6bff;
+      --gold:#ffcc4d;
+      --radius:18px;
+      --shadow:0 10px 30px rgba(0,0,0,.08);
+    }
+    *{box-sizing:border-box}
+    html,body{height:100%}
+    body{margin:0; font-family:"Nunito", system-ui, -apple-system, Segoe UI, Roboto, sans-serif; color:var(--ink); background:var(--bg); overflow:hidden}
+
+    .hearts{position:fixed; inset:0; overflow:hidden; z-index:0; pointer-events:none}
+    .heart{position:absolute; font-size:20px; opacity:.9; filter:drop-shadow(0 6px 8px rgba(255,105,180,.35));}
+    @keyframes floatUp{0%{transform:translateY(0) scale(0.9); opacity:.0}10%{opacity:1}100%{transform:translateY(-110vh) scale(1.25); opacity:0}}
+
+    .wrap{position:relative; display:grid; place-items:center; height:100%; z-index:1}
+    .card{width:min(720px,92vw); background:var(--card); border-radius:var(--radius); box-shadow:var(--shadow); padding:28px 26px; text-align:center}
+
+    .title{display:flex; align-items:center; justify-content:center; gap:10px; font-weight:900; letter-spacing:.2px}
+    .sparkle{color:var(--gold)}
+
+    .content{font-size:clamp(20px,2.6vw,28px); line-height:1.35; font-weight:800; margin:10px 0 18px}
+    .sub{font-size:14px; color:var(--muted)}
+
+    .row{display:flex; gap:14px; justify-content:center; flex-wrap:wrap}
+
+    .btn{appearance:none; border:0; cursor:pointer; padding:12px 20px; font-weight:800; border-radius:var(--radius); transition:transform .08s ease, box-shadow .2s ease, filter .2s ease}
+    .btn:active{transform:translateY(1px) scale(.995)}
+
+    .btn-primary{color:white; background:linear-gradient(135deg,var(--accentA),var(--accentB)); box-shadow:0 8px 18px rgba(155,107,255,.35)}
+    .btn-ghost{background:#f2f2f8; color:#333}
+
+    @keyframes popIn{0%{transform:scale(.92) translateY(6px); opacity:0}100%{transform:scale(1) translateY(0); opacity:1}}
+    .slide{display:none}
+    .slide.show{display:block; animation:popIn .38s cubic-bezier(.2,.8,.2,1)}
+
+    .dots{display:flex; gap:6px; justify-content:center; margin-top:10px}
+    .dot{width:7px; height:7px; border-radius:999px; background:#e2dff3; transition:width .25s ease, background .25s ease}
+    .dot.active{width:22px; background:linear-gradient(135deg,var(--accentA),var(--accentB))}
+
+    .twinkle{font-size:22px; margin-bottom:6px}
+
+    .final-small{font-size:14px; color:var(--muted); font-weight:600}
+
+    @media (max-width:420px){.btn{padding:11px 16px}.content{font-size:20px}}
+  </style>
+</head>
+<body>
+  <div class="hearts" aria-hidden="true"></div>
+
+  <main class="wrap">
+    <section class="card" role="group" aria-label="Love slides" id="slides"></section>
+  </main>
+
+  <script>
+    const CONFIG = {
+      slides: [
+        { text: "IK today has been shittttty af for u", sub: "trying to make it better hehe" },
+        { text: "do u wanna see what i made??? hehe", choices: [{label: "Yes!", go: "+1"}, {label: "No", go: "+1", ghost:true}] },
+        { text: "I LOVE U so muchhh its so sad to see u be sad and down :(((", sub: "im sorry for making ur mood bad" },
+        { text: "OK i have something for u , u have to TELL ME HOW U FEEL ABOUT EVERYPART OF IT (threat)" },
+        { text: "11 REASONS WHY YOU!", sub:"dekho dekho click kro hehe " },
+        { text: "reason 1 : YOU!", sub: "you make me the happiest and im so fucking heartbroken im runing so many of ur days ;(" },
+        { text: "reason 2 : i love when u look at me with ur pretty eyes" },
+        { text: "reason 3 : i love how tasty u smell", sub: "nom nom nom" },
+        { text: "reason 4 : i love how BHONDU u can be", sub: "even tho im more love u too" },
+        { text: "reason 5 : i love how weve gotten so close i wanna stay with you forever" },
+        { text: "reason6: i love how good it feels to hold u it feels so complete it feels right" },
+        { text: "reason 7: i love holding ur small soft hands" },
+        { text: "reason 8 : i love ur LIPGLOSSED lips", sub: "my baddie" },
+        { text: "reason 9 : i am obsessssssssed with ur yap sessions and u judging other couples haha" },
+        { text: "reason 10: YOUR MAKEUP LOOKS SO FUCKING GOOOOOOOOD ur so pretty omfggfgfgfg", sub:"tastes good too hehahahaha sorry for eating it all" },
+        { text: "reason 11: i just have a message for u next", sub: "not really a reason this one ig" },
+        // Final apology / validation message (smaller font requested)
+        { text: "jaanu , meri rasmalai , meri jaan ik today has been ANNOOOOYING AF and im just trying to lift u mood up (HOPE THIS WORKS IT TOOK LONG OK), I love you more than words, and the reasons I shared are just a few tiny pieces of why I'm in love with you. I want to be the person who lifts you up, not brings you down and im sorry for being someone who brings u down sometimes :((( . Please tell me how you're feeling, and I promise I'll listen and stand with u everyday till i am dead.", sub:"", final:true }
+      ],
+      heartsPer10s: 26,
+      emojis: ["❤","💖","💗","💕","💓","💞","💘"],
+      starIcon: "✨",
+    };
+
+    const heartLayer = document.querySelector('.hearts');
+    function spawnHeart(){
+      const e = document.createElement('div');
+      e.className='heart';
+      e.textContent = CONFIG.emojis[Math.floor(Math.random()*CONFIG.emojis.length)];
+      const startX = Math.random()*100;
+      const size = 16 + Math.random()*22;
+      const dur = 6 + Math.random()*6;
+      e.style.left = startX + 'vw';
+      e.style.bottom = '-40px';
+      e.style.fontSize = size + 'px';
+      e.style.animation = `floatUp ${dur}s linear forwards`;
+      heartLayer.appendChild(e);
+      setTimeout(()=> e.remove(), dur*1000);
+    }
+    setInterval(spawnHeart, 10000/CONFIG.heartsPer10s);
+    for(let i=0;i<12;i++) setTimeout(spawnHeart, i*200);
+
+    const host = document.getElementById('slides');
+    let index = 0;
+
+    function render(){
+      host.innerHTML = '';
+      const dots = document.createElement('div'); dots.className='dots';
+      CONFIG.slides.forEach((_,i)=>{ const d=document.createElement('div'); d.className='dot'+(i===index?' active':''); dots.appendChild(d); });
+
+      const s = CONFIG.slides[index];
+      const wrap = document.createElement('div'); wrap.className='slide show';
+
+      const title = document.createElement('div'); title.className='title'; title.innerHTML = `<span class="twinkle">${CONFIG.starIcon}</span>`;
+      const content = document.createElement('div'); content.className='content';
+
+      // If this is the final message and we want smaller font
+      if(s.final){
+        content.style.fontSize='16px';
+        content.style.fontWeight='600';
+      }
+
+      content.innerHTML = s.text.replaceAll('\n','<br/>');
+      wrap.appendChild(title);
+      wrap.appendChild(content);
+      if(s.sub){ const sub = document.createElement('div'); sub.className='sub'; sub.textContent = s.sub; wrap.appendChild(sub); }
+
+      const row = document.createElement('div'); row.className='row';
+      if (s.choices && Array.isArray(s.choices)){
+        s.choices.forEach(ch=>{
+          const b = document.createElement('button'); b.className = 'btn ' + (ch.ghost? 'btn-ghost':'btn-primary'); b.textContent = ch.label; b.addEventListener('click', ()=> goto(ch.go)); row.appendChild(b);
+        });
+      } else {
+        const next = document.createElement('button'); next.className='btn btn-primary'; next.textContent = (index === CONFIG.slides.length-1)? 'Finish' : 'Next'; next.addEventListener('click',()=> goto('+1')); row.appendChild(next);
+      }
+      wrap.appendChild(row);
+
+      host.appendChild(wrap);
+      host.appendChild(dots);
+    }
+
+    function goto(action){ if(typeof action === 'string' && action.startsWith('+')) index += parseInt(action.slice(1)); else if(typeof action === 'number') index = action; else index++; if(index >= CONFIG.slides.length) index = CONFIG.slides.length-1; render(); }
+
+    host.addEventListener('click', (e)=>{ if(e.target.closest('button')) return; const s = CONFIG.slides[index]; if(!(s.choices && Array.isArray(s.choices))) goto('+1'); });
+
+    render();
+  </script>
+</body>
+</html>
